@@ -24,6 +24,17 @@ This will install the node and yarn versions which will download the required no
 After that it will compile and test the backend code, and then copy the angular app into the static files directory. \
 The spring boot plugin will then create the executable jar, which is then copied to the spasubmission directory.
 
+### Issues 
+Currently my mailgun account has been blocked because I was using it to test \ 
+To get around this when building you can run 
+```
+mvn clean install -DskipTests
+```
+or alternately comment out the Test annotation on the following file:
+```
+spabackend/src/test/java/au/com/hypothesisconsulting/spachallenge/MailGunTests
+```
+
 ## Running the app
 
 From cmd/bash in the spasubmission directory, run the following
