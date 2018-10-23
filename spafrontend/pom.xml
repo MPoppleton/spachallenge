@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>spafrontend</artifactId>
+  <name>spafrontend</name>
+  <packaging>pom</packaging>
+
+  <parent>
+    <groupId>au.com.hypothesisconsulting</groupId>
+    <artifactId>spachallenge-parent</artifactId>
+    <version>0.0.1</version>
+    <relativePath>../</relativePath>
+  </parent>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.github.eirslett</groupId>
+        <artifactId>frontend-maven-plugin</artifactId>
+        <version>1.6</version>
+        <executions>
+          <execution>
+            <id>install node and yarn</id>
+            <goals>
+              <goal>install-node-and-yarn</goal>
+            </goals>
+            <phase>generate-resources</phase>
+          </execution>
+          <execution>
+            <id>yarn install</id>
+            <goals>
+              <goal>yarn</goal>
+            </goals>
+            <configuration>
+              <arguments>install --frozen-lockfile --non-interactive</arguments>
+            </configuration>
+          </execution>
+          <execution>
+            <id>yarn build</id>
+            <goals>
+              <goal>yarn</goal>
+            </goals>
+            <configuration>
+              <arguments>build --prod --aot</arguments>
+            </configuration>
+          </execution>
+        </executions>
+        <configuration>
+          <nodeVersion>v8.9.4</nodeVersion>
+          <yarnVersion>v1.9.4</yarnVersion>
+          <workingDirectory>.</workingDirectory>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

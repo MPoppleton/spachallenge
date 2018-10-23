@@ -1,0 +1,131 @@
+<!--The content below is only a placeholder and can be replaced.-->
+<div class="container-fluid">
+  <div class="row mt-5">
+    <div class="col-md-12 text-center">
+      <h2>Hypothesis SPA Challenge</h2>
+    </div>
+  </div>
+  <div class="row mt-5">
+    <div class="offset-3"></div>
+    <div class="col-md-6">
+      <form>
+        <mat-form-field class="full-width">
+          <mat-chip-list #emailList>
+            <mat-chip *ngFor="let email of emails" [selectable]="selectable"
+                      [removable]="removable" (removed)="removeEmail(email)">
+              {{email}}
+              <mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
+            </mat-chip>
+            <input placeholder="To"
+                   matInput
+                   [formControl]="toFormControl"
+                   [errorStateMatcher]="matcherTo"
+                   [matChipInputFor]="emailList"
+                   [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                   [matChipInputAddOnBlur]="addOnBlur"
+                   (matChipInputTokenEnd)="addEmail($event)">
+            <mat-error *ngIf="toFormControl.hasError('email') && !toFormControl.hasError('required')">
+              Please enter valid email addresses to send the email to
+            </mat-error>
+            <mat-error *ngIf="toFormControl.hasError('required') || (emails.length === 0 && !toFormControl.hasError('email'))">
+              At least one email is <strong>required</strong>
+            </mat-error>
+          </mat-chip-list>
+        </mat-form-field>
+        <mat-form-field class="full-width">
+          <mat-chip-list #ccList>
+            <mat-chip *ngFor="let email of cc" [selectable]="selectable"
+                      [removable]="removable" (removed)="removeCC(email)">
+              {{email}}
+              <mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
+            </mat-chip>
+            <input placeholder="Cc"
+                   matInput
+                   [formControl]="ccFormControl"
+                   [errorStateMatcher]="matcherCc"
+                   [matChipInputFor]="ccList"
+                   [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                   [matChipInputAddOnBlur]="addOnBlur"
+                   (matChipInputTokenEnd)="addCC($event)">
+            <mat-error *ngIf="ccFormControl.hasError('email')">
+              Please enter valid email addresses to Cc the email to
+            </mat-error>
+          </mat-chip-list>
+        </mat-form-field>
+        <mat-form-field class="full-width">
+          <mat-chip-list #bccList>
+            <mat-chip *ngFor="let email of bcc" [selectable]="selectable"
+                      [removable]="removable" (removed)="removeBcc(email)">
+              {{email}}
+              <mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
+            </mat-chip>
+            <input placeholder="Bcc"
+                   matInput
+                   [formControl]="bccFormControl"
+                   [errorStateMatcher]="matcherBcc"
+                   [matChipInputFor]="bccList"
+                   [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                   [matChipInputAddOnBlur]="addOnBlur"
+                   (matChipInputTokenEnd)="addBcc($event)">
+            <mat-error *ngIf="bccFormControl.hasError('email')">
+              Please enter valid email addresses to Bcc the email to
+            </mat-error>
+          </mat-chip-list>
+        </mat-form-field>
+        <mat-form-field class="full-width">
+          <input matInput placeholder="From (your email address)"
+                 [(ngModel)]="from"
+                 required
+                 [formControl]="fromFormControl"
+                 [errorStateMatcher]="matcherFrom"
+          >
+          <mat-error *ngIf="fromFormControl.errors">
+            Your sending email address is <strong>required</strong>
+          </mat-error>
+        </mat-form-field>
+        <mat-form-field class="full-width">
+          <input matInput placeholder="Subject" [(ngModel)]="subject" id="subject" [ngModelOptions]="{standalone: true}">
+        </mat-form-field>
+        <mat-form-field class="full-width">
+          <textarea matInput class="email-body" placeholder="Message"
+                    [formControl]="contentFormControl"
+                    [errorStateMatcher]="matcherContent"
+                    required
+                    [(ngModel)]="messageContent"
+          ></textarea>
+          <mat-error *ngIf="messageContent === undefined || messageContent === ''">
+            A message is <strong>required</strong>
+          </mat-error>
+        </mat-form-field>
+          <div class="float-right">
+            <button mat-raised-button class="mr-2" (click)="clearEmail()" [disabled]="sending">Clear</button>
+            <button mat-raised-button color="warn" (click)="sendEmail()" [disabled]="sending || fromFormControl.errors || toFormControl.errors || ccFormControl.errors || bccFormControl.errors || contentFormControl.errors">Send</button>
+          </div>
+        <div class="row">
+          <div *ngIf="sending">
+            <div>
+              <div class="orbit-spinner">
+                <div class="orbit"></div>
+                <div class="orbit"></div>
+                <div class="orbit"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="col-md-3">
+    </div>
+  </div>
+
+</div>
+
+<swal #swalSuccess
+      title="Yay!" text="The email has been sent" type="success"
+      [options]="{ confirmButtonText: 'Close' }"
+      ></swal>
+
+<swal #swalError
+      title="Oops!" text="Sorry, something went wrong sending the email" type="warning"
+      [options]="{ confirmButtonText: 'Close' }"
+      ></swal>
