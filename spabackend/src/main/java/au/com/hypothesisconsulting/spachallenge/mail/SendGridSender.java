@@ -17,6 +17,8 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +33,8 @@ import java.util.List;
 @Service
 public class SendGridSender implements MailProvider {
 
+    Logger logger = LoggerFactory.getLogger(SendGridSender.class);
+
     @Autowired
     SendGridConfig sendGridConfig;
 
@@ -41,6 +45,7 @@ public class SendGridSender implements MailProvider {
     public HttpResponse sendMail(String subject, String body, String from, List<String> to, List<String> cc, List<String> bcc) throws MailSendFailException {
 
         try {
+            logger.info("Attempting to send email");
             this.sslContext = new SSLContextBuilder()
                     .loadTrustMaterial(null, ((x509Certificates, authType) -> true)).build();
             this.httpClient = HttpClients.custom()
@@ -75,9 +80,7 @@ public class SendGridSender implements MailProvider {
             content.value = body;
             sendGridMail.content.add(content);
 
-            String emailJson = null;
-
-            emailJson = JsonUtil.toJson(sendGridMail);
+            String emailJson = JsonUtil.toJson(sendGridMail);
 
             HttpEntity sendEntity = new StringEntity(emailJson);
             httpPost.setEntity(sendEntity);
@@ -86,8 +89,15 @@ public class SendGridSender implements MailProvider {
 
             CloseableHttpResponse response =  httpClient.execute(httpPost);
             response.close();
+
+            if (response.getStatusLine().getStatusCode() != 202) {
+                throw new MailSendFailException(response.getStatusLine().getReasonPhrase());
+            }
+
+            logger.info("Email successfully submitted to SendGrid");
             return response;
         } catch (IOException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
+            logger.error("Failed to send mail to SendGrid: " + e);
             throw new MailSendFailException(e.getMessage());
         }
     }

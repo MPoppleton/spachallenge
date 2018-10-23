@@ -4,7 +4,6 @@ import au.com.hypothesisconsulting.spachallenge.config.MailGunConfig;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -14,6 +13,8 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +30,8 @@ import java.util.stream.Collectors;
 @Service
 public class MailGunSender implements MailProvider {
 
+    Logger logger = LoggerFactory.getLogger(MailGunSender.class);
+
     @Autowired
     MailGunConfig mailGunConfig;
 
@@ -43,6 +46,8 @@ public class MailGunSender implements MailProvider {
         provider.setCredentials(AuthScope.ANY, credentials);
 
         try {
+            logger.info("Attempting to send email");
+
             this.sslContext = new SSLContextBuilder()
                     .loadTrustMaterial(null, ((x509Certificates, authType) -> true)).build();
             this.httpClient = HttpClients.custom()
@@ -86,10 +91,16 @@ public class MailGunSender implements MailProvider {
             HttpPost httpPost = new HttpPost(builder.build());
 
             CloseableHttpResponse response = httpClient.execute(httpPost);
-
             response.close();
+
+            if (response.getStatusLine().getStatusCode() != 200) {
+                throw new MailSendFailException(response.getStatusLine().getReasonPhrase());
+            }
+
+            logger.info("Email successfully submitted to MailGun");
             return response;
         } catch (URISyntaxException | IOException e) {
+            logger.error("Failed to send mail to MailGun: " + e);
             throw new MailSendFailException(e.getMessage());
         }
     }
